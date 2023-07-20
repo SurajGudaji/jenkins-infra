@@ -13,8 +13,8 @@ limitations under the License.
 '
 #-------------------------------------------------------------------------
 set -e
-source <(curl -L https://raw.githubusercontent.com/ocp-power-automation/openshift-install-power/f3ca66402921c00a5637be678f547192b83ac3e2/openshift-install-powervs 2> /dev/null |  grep -v 'main "$@"')
-source <(curl -L https://raw.githubusercontent.com/ppc64le-cloud/pvsadm/master/samples/convert-upload-images-powervs/convert-upload-images-powervs 2> /dev/null | grep -v 'main "$@"')
+source <(curl -L https://raw.githubusercontent.com/ocp-power-automation/openshift-install-power/92996305e1a8bef69fbe613b912d5561cc753172/openshift-install-powervs 2> /dev/null |  grep -v 'main "$@"')
+source <(curl -L https://raw.githubusercontent.com/Poorna-Gottimukkula1/pvsadm/test/samples/convert-upload-images-powervs/convert-upload-images-powervs 2> /dev/null | grep -v 'main "$@"')
 
 function help {
   cat <<-EOF
@@ -29,6 +29,7 @@ Args:
       --rhel-url url                url pointing to the RHEL qcow2 image(optional)
       --rhcos-url url               url pointing to the RHCOS qcow2 image(optional)
       --centos-url url              url pointing to the CentOS qcow2 image(optional)
+      --skip-os-password            Skip the root user password(optional)
       --pvsadm_version              Pvsadm version(optional)
       --help                        help for upload
 EOF
@@ -93,7 +94,7 @@ function setup_image_env_variables {
     RHCOS_IMAGE_NAME=$IMAGE_NAME
   fi
   if [[ "${CENTOS_IMAGE_NAME}" != "" ]]; then
-    CENTOS_OBJECT_NAME=CENTOS_IMAGE_NAME.ova.gz
+    CENTOS_OBJECT_NAME=$CENTOS_IMAGE_NAME.ova.gz
   else
     standardize_object_name $CENTOS_URL
     CENTOS_OBJECT_NAME=$OBJECT_NAME
@@ -139,6 +140,9 @@ function main {
       shift
       COS_INSTANCE_NAME="$1"
       ;;
+    "--skip-os-password")
+      SKIP_OS_PASSWORD="--skip-os-password"
+      ;;  
     "--help")
       help
       ;;
@@ -161,24 +165,24 @@ function main {
   setup
   variables
 
-  # Downloading rhel locally, else the url may expire by the time the VM comes up
-  if ! [ -z "${RHEL_URL}" ];then
-    SECONDS=0
-    MSG="Downloading rhel qcow2 image completed in"
-    download_image "rhel"
-    time_taken "$MSG"
-  fi
+  # # Downloading rhel locally, else the url may expire by the time the VM comes up
+  # if ! [ -z "${RHEL_URL}" ];then
+  #   SECONDS=0
+  #   MSG="Downloading rhel qcow2 image completed in"
+  #   download_image "rhel"
+  #   time_taken "$MSG"
+  # fi
   create_vm
 
   if !  prepare_remote; then  destroy_vm && exit 1 ; fi
   if !  setup_pvsadm_remote; then  destroy_vm && exit 1 ; fi
 
   if ! [ -z "${RHEL_URL}" ];then
-    if ! copy_image_to_remote; then  destroy_vm && exit 1 ; fi
-    if ! convert_image_remote "rhel" "${RHEL_IMAGE_NAME}" "${RHEL_URL}"; then  destroy_vm && exit 1 ; fi
+    # if ! copy_image_to_remote; then  destroy_vm && exit 1 ; fi
+    if ! convert_image_remote "rhel" "${RHEL_IMAGE_NAME}" "${RHEL_URL}" "${SKIP_OS_PASSWORD}" ; then  destroy_vm && exit 1 ; fi
     RHEL_IMAGE_PATH_REMOTE=${IMAGE_PATH}
     if ! upload_image_remote "${COS_BUCKET_NAME}" "${RHEL_IMAGE_PATH_REMOTE}" "${COS_BUCKET_REGION}"; then  destroy_vm && exit 1 ; fi
-    echo "---------------- $RHEL_IMAGE_NAME $ROOT_PASSWORD ----------------" >> $OUTPUT_LOG_FILE
+    echo "---------------- $(if [ -z "$SKIP_OS_PASSWORD" ]; then echo "$RHEL_IMAGE_NAME $ROOT_PASSWORD"; else echo "$RHEL_IMAGE_NAME"; fi) ----------------" >> $OUTPUT_LOG_FILE
     echo "---------------- Instances Uploaded ----------------" >> $OUTPUT_LOG_FILE
     while IFS= read -r SERV_NAME; do
       if ! [ -z "$SERV_NAME" ];then
@@ -209,10 +213,10 @@ function main {
     done <powervs_instance_list.txt
   fi
     if ! [ -z "${CENTOS_URL}" ];then
-    if ! convert_image_remote "centos" "${CENTOS_IMAGE_NAME}" "${CENTOS_URL}" ; then  destroy_vm && exit 1 ; fi
+    if ! convert_image_remote "centos" "${CENTOS_IMAGE_NAME}" "${CENTOS_URL}" "${SKIP_OS_PASSWORD}" ; then  destroy_vm && exit 1 ; fi
     CENTOS_IMAGE_PATH_REMOTE=${IMAGE_PATH}
     if !  upload_image_remote "${COS_BUCKET_NAME}" "${CENTOS_IMAGE_PATH_REMOTE}" "${COS_BUCKET_REGION}" ; then  destroy_vm && exit 1 ; fi
-    echo "---------------- $CENTOS_IMAGE_NAME $ROOT_PASSWORD ----------------" >> $OUTPUT_LOG_FILE
+    echo "---------------- $(if [ -z "$SKIP_OS_PASSWORD" ]; then echo "$CENTOS_IMAGE_NAME $ROOT_PASSWORD"; else echo "$CENTOS_IMAGE_NAME"; fi) ----------------" >> $OUTPUT_LOG_FILE
     echo "---------------- Instances Uploaded ----------------" >> $OUTPUT_LOG_FILE
     while IFS= read -r SERV_NAME; do
       if ! [ -z "$SERV_NAME" ];then
