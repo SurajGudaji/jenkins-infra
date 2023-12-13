@@ -63,23 +63,15 @@ pipeline {
             archiveAllArtifacts("ci-monitoring-automation/output.txt", "ci-monitoring-automation/output_detailed.txt")
             script{
             def fileContent = readFile 'ci-monitoring-automation/output.txt'
-            def lines = fileContent.readLines()
-            int halfContent = lines.size() / 2
-            String firstPart = lines[0..halfContent].join('\n')
-            String secondPart = lines[(halfContent + 1)..-1].join('\n')
-            //slackSend(color: "#006e23", message: "*_SUCCESS_*: `${env.JOB_NAME}` #${env.BUILD_NUMBER}: (<${env.BUILD_URL}|Open>) \n *Prod Prow CI Jobs Summary* ```\n${firstPart}\n```")
+            slackSend(channel: "#ocp-prod-prow-ci-job-status", color: "#006e23", message: "*_SUCCESS_*: `${env.JOB_NAME}` #${env.BUILD_NUMBER}: (<${env.BUILD_URL}|Open>) \n *Prod Prow CI Jobs Summary* ```\n${fileContent}\n```", sendAsText: true)
+
+            // def lines = fileContent.readLines()
+            // int halfContent = lines.size() / 2
+            // String firstPart = lines[0..halfContent].join('\n')
+            // String secondPart = lines[(halfContent + 1)..-1].join('\n')       
+            //slackSend(color: "#006e23", message: "*_SUCCESS_*: `${env.JOB_NAME}` #${env.BUILD_NUMBER}: (<${env.BUILD_URL}|Open>) \n *Prod Prow CI Jobs Summary* ```\n${firstPart}\n```", sendAsText: true)
             //slackSend(color: "#006e23", message: "```\n${secondPart}\n```")
-            slackSend(color: "#006e23", message: "*_SUCCESS_*: `${env.JOB_NAME}` #${env.BUILD_NUMBER}: (<${env.BUILD_URL}|Open>)", 
-            attachments: [
-                [
-                    title: "Prod Prow CI Jobs Summary",
-                    text: "```\n${fileContent}\n```",
-                    color: '#63C1A0',
-                    type: "text"
-                    
-                ]
-                ]
-            )
+            //slackSend(color: "#006e23", message: "*_SUCCESS_*: `${env.JOB_NAME}` #${env.BUILD_NUMBER}: (<${env.BUILD_URL}|Open>)", attachments: [[title: "Prod Prow CI Jobs Summary", text: "```\n${fileContent}\n```", color: '#63C1A0', type: "text"]])
             
             }
             cleanWs()
