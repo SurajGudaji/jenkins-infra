@@ -9,10 +9,10 @@ pipeline {
         }
     }
     parameters {
-        string(defaultValue: '15,16', description: 'Build(quay image or build number)', name: 'selected_ci')
-        string(defaultValue: '', description: 'Enter time(in Minutes) to retain the cluster', name: 'before_date')
-        string(defaultValue: '', description: 'Enter the Go Language Version', name: 'after_date')
-        string(defaultValue: '3', description: 'Enter the Go Language Version', name: 'query_option')
+        string(defaultValue: '15,16', description: 'Enter the ci', name: 'selected_ci')
+        string(defaultValue: '2023-12-13', description: 'Enter the before date', name: 'before_date')
+        string(defaultValue: '2023-12-12', description: 'Enter the after date', name: 'after_date')
+        string(defaultValue: '3', description: 'Enter the query option', name: 'query_option')
     }
     environment {
         //Parameters
