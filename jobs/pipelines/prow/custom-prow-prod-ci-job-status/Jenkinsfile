@@ -1,0 +1,89 @@
+@Library('jenkins-upstream-library') _
+
+pipeline {
+    agent {
+        docker {
+            image 'quay.io/powercloud/inbound-agent:4.10-3.3'
+            args '-v /etc/resolv.conf:/etc/resolv.conf'
+            label 'jump-vpc-x86_64'
+        }
+    }
+    parameters {
+        string(defaultValue: '15,16', description: 'Build(quay image or build number)', name: 'selected_ci')
+        string(defaultValue: '', description: 'Enter time(in Minutes) to retain the cluster', name: 'before_date')
+        string(defaultValue: '', description: 'Enter the Go Language Version', name: 'after_date')
+        string(defaultValue: '3', description: 'Enter the Go Language Version', name: 'query_option')
+    }
+    environment {
+        //Parameters
+        SELECTED_CI="${params.selected_ci}"
+        BEFORE_DATE="${params.before_date}"
+        AFTER_DATE="${params.after_date}"
+        QUERY_OPTION="${params.query_option}"
+    }
+    stages {
+        stage('Run Daily Build Update Script'){
+            steps{
+                script {
+                    try {
+                        sh '''
+                            #!/bin/bash
+                            if command -v python3 &>/dev/null; then
+                                echo "Python3 installed"
+                            else
+                                sudo apt-get install -y python3
+                            fi
+                            
+                            if command -v pip &>/dev/null; then
+                                echo "pip installed"
+                            else
+                                sudo apt-get install -y python3-pip
+                                 
+                            fi
+                            sudo pip install virtualenv
+                            echo "Clone ci monitoring repo"
+                            git clone https://github.com/ocp-power-automation/ci-monitoring-automation.git
+                            
+                            echo "Activate virtualenv"
+                            cd ci-monitoring-automation
+                            virtualenv venv
+                            . ./venv/bin/activate
+                            
+                            pip install -r requirements.txt
+                            
+                            echo "Executing daily build update script"
+                            cat config.ini
+                            echo "========================="
+                            cat << EOF > config.ini
+                            [Settings]
+                            JEN = True
+                            selected_ci = "${SELECTED_CI}"
+                            before_date = "${BEFORE_DATE}"
+                            after_date = "${AFTER_DATE}"
+                            query_option = ${QUERY_OPTION}
+                            EOF
+                            cat config.ini
+                            echo "========================="
+                            python3 CI_JobHistory.py > output.txt
+                            cat ./output.txt
+                        '''
+                    }
+                    catch (err){
+                            echo 'Error ! Failed while running CI_DailyBuildUpdates script'
+                            env.FAILED_STAGE=env.STAGE_NAME
+                            throw err
+                    }
+                }
+           }
+        }
+
+    }
+    
+    post {
+        always {
+            archiveAllArtifacts("ci-monitoring-automation/output.txt")
+            cleanWs()
+        }
+    }
+
+}
