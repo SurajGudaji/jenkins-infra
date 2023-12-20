@@ -54,14 +54,16 @@ pipeline {
                             echo "Executing daily build update script"
                             cat config.ini
                             echo "========================="
+
                             cat << EOF > config.ini
                             [Settings]
                             JEN = True
                             selected_ci = "${SELECTED_CI}"
                             before_date = "${BEFORE_DATE}"
                             after_date = "${AFTER_DATE}"
-                            query_option = ${QUERY_OPTION}
+                            query_option = "${QUERY_OPTION}"
                             EOF
+
                             cat config.ini
                             echo "========================="
                             python3 CI_JobHistory.py > output.txt
