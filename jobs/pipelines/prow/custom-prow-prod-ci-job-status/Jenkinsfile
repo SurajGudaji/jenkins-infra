@@ -9,9 +9,9 @@ pipeline {
         }
     }
     parameters {
-        string(defaultValue: '15,16', description: 'Enter the ci', name: 'SelectedCi')
-        string(defaultValue: '2023-12-13', description: 'Enter the before date', name: 'BeforeDate')
-        string(defaultValue: '2023-12-12', description: 'Enter the after date', name: 'AfterDate')
+        string(defaultValue: '14,15,16', description: 'Enter CI numbers separated by commas (e.g., 14,15,16)', name: 'SelectedCi')
+        string(defaultValue: '2023-12-13', description: 'Enter the from date from where you want to get the details as yyyy-mm-dd farmat (e.g., 2023-12-13 )', name: 'BeforeDate')
+        string(defaultValue: '2023-12-16', description: 'Enter the last date till where you want to get the details as yyyy-mm-dd format (e.g., 2023-12-16 )', name: 'AfterDate')
         string(defaultValue: '3', description: 'Enter the query option', name: 'QueryOption')
     }
     environment {
