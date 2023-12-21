@@ -9,18 +9,18 @@ pipeline {
         }
     }
     parameters {
-        string(defaultValue: '15,16', description: 'Enter the ci', name: 'selected_ci')
-        string(defaultValue: '2023-12-13', description: 'Enter the before date', name: 'before_date')
-        string(defaultValue: '2023-12-12', description: 'Enter the after date', name: 'after_date')
-        string(defaultValue: '3', description: 'Enter the query option', name: 'query_option')
+        string(defaultValue: '15,16', description: 'Enter the ci', name: 'SelectedCi')
+        string(defaultValue: '2023-12-13', description: 'Enter the before date', name: 'BeforeDate')
+        string(defaultValue: '2023-12-12', description: 'Enter the after date', name: 'AfterDate')
+        string(defaultValue: '3', description: 'Enter the query option', name: 'QueryOption')
     }
     environment {
         //Parameters
-        SELECTED_CI="${params.selected_ci}"
-        BEFORE_DATE="${params.before_date}"
-        AFTER_DATE="${params.after_date}"
-        QUERY_OPTION="${params.query_option}"
-    }
+        SELECTED_CI = "${params.SelectedCi}"
+        BEFORE_DATE = "${params.BeforeDate}"
+        AFTER_DATE = "${params.AfterDate}"
+        QUERY_OPTION = "${params.QueryOption}"
+     }
     stages {
         stage('Run Daily Build Update Script'){
             steps{
@@ -42,7 +42,7 @@ pipeline {
                             fi
                             sudo pip install virtualenv
                             echo "Clone ci monitoring repo"
-                            git clone https://github.com/ocp-power-automation/ci-monitoring-automation.git
+                            git clone https://github.com/Poorna-Gottimukkula1/ci-monitoring-automation.git
                             
                             echo "Activate virtualenv"
                             cd ci-monitoring-automation
@@ -55,15 +55,11 @@ pipeline {
                             cat config.ini
                             echo "========================="
 
-                            cat << EOF > config.ini
-                            [Settings]
-                            JEN = True
-                            selected_ci = "${SELECTED_CI}"
-                            before_date = "${BEFORE_DATE}"
-                            after_date = "${AFTER_DATE}"
-                            query_option = "${QUERY_OPTION}"
-                            EOF
-
+                            sed -i "s/__CI__/$SELECTED_CI/g" config_jenkins.ini 
+                            sed -i "s/__BDATE__/${BEFORE_DATE}/g" config_jenkins.ini 
+                            sed -i "s/__ADATE__/${AFTER_DATE}/g" config_jenkins.ini 
+                            sed -i "s/__QP__/${QUERY_OPTION}/g" config_jenkins.ini
+                            cp -rp config_jenkins.ini config.ini
                             cat config.ini
                             echo "========================="
                             python3 CI_JobHistory.py > output.txt
