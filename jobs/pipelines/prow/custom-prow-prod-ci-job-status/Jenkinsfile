@@ -10,7 +10,7 @@ pipeline {
     }
     parameters {
         string(defaultValue: '14,15,16', description: 'Enter CI numbers separated by commas (e.g., 14,15,16)', name: 'SelectedCi')
-        string(defaultValue: '2023-12-16', description: 'Enter the from date from where you want to get the details as yyyy-mm-dd farmat (e.g., 2023-12-13 )', name: 'StartDate')
+        string(defaultValue: '2023-12-16', description: 'Enter the from date from where you want to get the details as yyyy-mm-dd format (e.g., 2023-12-13 )', name: 'StartDate') for
         string(defaultValue: '2023-12-13', description: 'Enter the last date till where you want to get the details as yyyy-mm-dd format (e.g., 2023-12-16 )', name: 'EndDate')
         string(defaultValue: '3', description: 'Enter the query option', name: 'QueryOption')
     }
