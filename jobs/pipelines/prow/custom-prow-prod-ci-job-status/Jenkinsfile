@@ -33,7 +33,13 @@ pipeline {
         ''' , name: 'SelectedCi')
         string(defaultValue: '2023-12-13', description: 'Enter the from date from where you want to get the details as yyyy-mm-dd format (e.g., 2023-12-13 )', name: 'StartDate')
         string(defaultValue: '2023-12-14', description: 'Enter the last date till where you want to get the details as yyyy-mm-dd format (e.g., 2023-12-16 )', name: 'EndDate')
-        choice(description: 'Choose the query option', choices: ['3','1','2', '4'], name: 'QueryOption')
+        choice(description: '''
+        Select the query option from the following
+        1. Check Node Crash
+        2. Brief Job information
+        3. Detailed Job information
+        4. Failed testcases
+        ''', choices: ['3','1','2', '4'], name: 'QueryOption')
     }
     environment {
         //Parameters
