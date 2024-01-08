@@ -1,4 +1,4 @@
-@Library('poorna-library') _
+@Library('poorna-library@prow-job-status') _
 
 pipeline {
     agent {
