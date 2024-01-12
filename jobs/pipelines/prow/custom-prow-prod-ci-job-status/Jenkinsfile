@@ -30,7 +30,7 @@ pipeline {
         17  4.15 heavy build
         18  4.14 MCE
         19  4.14 SNO
-        ''' , name: 'SelectedCi')
+        ''' , name: 'SelectedCI')
         string(defaultValue: '2023-12-13', description: 'Enter the from date from where you want to get the details as yyyy-mm-dd format (e.g., 2023-12-13 )', name: 'StartDate')
         string(defaultValue: '2023-12-14', description: 'Enter the last date till where you want to get the details as yyyy-mm-dd format (e.g., 2023-12-16 )', name: 'EndDate')
         choice(description: '''
@@ -43,7 +43,7 @@ pipeline {
     }
     environment {
         //Parameters
-        SELECTED_CI = "${params.SelectedCi}"
+        SELECTED_CI = "${params.SelectedCI}"
         BEFORE_DATE = "${params.EndDate}"
         AFTER_DATE = "${params.StartDate}"
         QUERY_OPTION = "${params.QueryOption}"
@@ -69,7 +69,7 @@ pipeline {
                             fi
                             sudo pip install virtualenv
                             echo "Clone ci monitoring repo"
-                            git clone https://github.com/Poorna-Gottimukkula1/ci-monitoring-automation.git
+                            git clone https://github.com/ocp-power-automation/ci-monitoring-automation.git
                             
                             echo "Activate virtualenv"
                             cd ci-monitoring-automation
@@ -82,11 +82,11 @@ pipeline {
                             cat config.ini
                             echo "========================="
 
-                            sed -i "s/__CI__/$SELECTED_CI/g" config_jenkins.ini 
-                            sed -i "s/__BDATE__/${BEFORE_DATE}/g" config_jenkins.ini 
-                            sed -i "s/__ADATE__/${AFTER_DATE}/g" config_jenkins.ini 
-                            sed -i "s/__QP__/${QUERY_OPTION}/g" config_jenkins.ini
-                            cp -rp config_jenkins.ini config.ini
+                            sed -i "s/False/True/g" config.ini
+                            sed -i "s/__CI__/$SELECTED_CI/g" config.ini 
+                            sed -i "s/__BDATE__/${BEFORE_DATE}/g" config.ini 
+                            sed -i "s/__ADATE__/${AFTER_DATE}/g" config.ini 
+                            sed -i "s/__QP__/${QUERY_OPTION}/g" config.ini
                             cat config.ini
                             echo "========================="
                             python3 CI_JobHistory.py > output.txt
