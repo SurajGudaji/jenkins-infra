@@ -40,7 +40,7 @@ pipeline {
         // 3. Detailed Job information
         // 4. Failed testcases
         // ''', choices: ['3','1','2', '4'], name: 'QueryOption')
-        load(vars/activeChoiceParameters.groovy)
+        activeChoiceParameters()
     }
     environment {
         //Parameters
