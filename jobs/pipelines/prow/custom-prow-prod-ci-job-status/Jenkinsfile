@@ -42,7 +42,7 @@ pipeline {
     //     // ''', choices: ['3','1','2', '4'], name: 'QueryOption')   
     // }
 
-    properties([
+    options([
         parameters([
             string(defaultValue: '14', description: '''
             Enter the following CI numbers separated by commas to query (e.g., 14,15,16)
