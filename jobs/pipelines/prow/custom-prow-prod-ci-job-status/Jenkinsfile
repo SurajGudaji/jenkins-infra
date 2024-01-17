@@ -9,7 +9,7 @@ pipeline {
         }
     }
     parameters {
-        string(defaultValue: '14,15,16', description: '''
+        string(defaultValue: '14', description: '''
         Enter the following CI numbers separated by commas to query (e.g., 14,15,16)
         1  4.11 libvirt
         2  4.11 to 4.12 upgrade
@@ -33,13 +33,35 @@ pipeline {
         ''' , name: 'SelectedCI')
         string(defaultValue: '2024-1-15', description: 'Enter the from date from where you want to get the details as yyyy-mm-dd format (e.g., 2023-12-13 )', name: 'StartDate')
         string(defaultValue: '2024-1-16', description: 'Enter the last date till where you want to get the details as yyyy-mm-dd format (e.g., 2023-12-16 )', name: 'EndDate')
-        choice(description: '''
-        Select the query option from the following
-        1. Check Node Crash
-        2. Brief Job information
-        3. Detailed Job information
-        4. Failed testcases
-        ''', choices: ['3','1','2', '4'], name: 'QueryOption')
+        // choice(description: '''
+        // Select the query option from the following
+        // 1. Check Node Crash
+        // 2. Brief Job information
+        // 3. Detailed Job information
+        // 4. Failed testcases
+        // ''', choices: ['3','1','2', '4'], name: 'QueryOption')
+        [
+            $class: 'ChoiceParameter',
+            choiceType: 'PT_SINGLE_SELECT',
+            description: 'Select a query option',
+            filterLength: 1,
+            filterable: false,
+            name: 'QueryOption',
+            randomName: 'QueryOption',
+            script: [
+                $class: 'GroovyScript',
+                fallbackScript: [
+                    classpath: [],
+                    sandbox: true,
+                    script: 'return ["Error"]'
+                ],
+                script: [
+                    classpath: [],
+                    sandbox: true,
+                    script: 'return ["1" : "Check Node Crash", "2" : "Brief Job information", "3" : "Detailed Job information", "4" : "Failed testcases"]'
+                ]
+            ]
+        ]   
     }
     environment {
         //Parameters
